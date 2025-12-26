@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=SeuPasswordAqui123!
+      - SPLUNK_HEC_TOKEN=seu-token-hec-aqui
+    ports:
+      - "8000:8000"  # Web UI
+      - "8088:8088"  # HEC (HTTP Event Collector)
+      - "9997:9997"  # Receiving port
+      - "8089:8089"  # Management port
+    volumes:
+      - splunk-data:/opt/splunk/var
+      - splunk-etc:/opt/splunk/etc
+    restart: unless-stopped
+
+volumes:
+  splunk-data:
+    driver: local
+  splunk-etc:
+    driver: local
