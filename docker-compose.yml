@@ -6,8 +6,11 @@ services:
     container_name: splunk
     environment:
       - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
       - SPLUNK_PASSWORD=SeuPasswordAqui123!
       - SPLUNK_HEC_TOKEN=seu-token-hec-aqui
+      - SPLUNK_HTTP_ENABLESSL=false
+      - SPLUNKD_SSL_ENABLE=false
     ports:
       - "8000:8000"  # Web UI
       - "8088:8088"  # HEC (HTTP Event Collector)
@@ -16,7 +19,17 @@ services:
     volumes:
       - splunk-data:/opt/splunk/var
       - splunk-etc:/opt/splunk/etc
+      - ./splunk-config:/tmp/defaults
     restart: unless-stopped
+    command: >
+      bash -c "
+      /sbin/entrypoint.sh start-service &
+      sleep 30 &&
+      /opt/splunk/bin/splunk set web-port 8000 -auth admin:SeuPasswordAqui123! &&
+      /opt/splunk/bin/splunk set servername localhost -auth admin:SeuPasswordAqui123! &&
+      /opt/splunk/bin/splunk restart &&
+      tail -f /opt/splunk/var/log/splunk/splunkd.log
+      "
 
 volumes:
   splunk-data:
